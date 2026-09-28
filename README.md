@@ -31,9 +31,6 @@ conda env create -f environment.yml
 conda activate ddrm
 ```
 
-The removed Conda `prefix` only specified the original author's local
-installation directory; removing it does not change the dependency list.
-
 ## Diffusion checkpoint
 
 Download `model005000.pt` from the public
@@ -85,9 +82,7 @@ python main.py \
 ```
 
 Portable Slurm examples are included under `01_nume/`, `02_US/`, and
-`03_SAR/`. The second SAR script accepts
-`SAR_RUNNER=seaside-sar-388 sbatch 03_SAR/sarSL_imag2.sl` to select patch
-388; its default is patch 50.
+`03_SAR/`. 
 
 ## MATLAB post-analysis
 
