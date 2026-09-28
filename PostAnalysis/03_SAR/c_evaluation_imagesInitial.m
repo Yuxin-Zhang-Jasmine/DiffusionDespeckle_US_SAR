@@ -1,0 +1,127 @@
+close all
+clear
+clc
+
+% ------------parameter--------------
+dataName = '14';   %[11, 12, 14, 50, 388]
+%------------------------------------
+
+scriptDir = fileparts(mfilename('fullpath'));
+postAnalysisRoot = fileparts(scriptDir);
+srcRoot = fullfile(postAnalysisRoot, 'src');
+addpath(genpath(srcRoot));
+ustbRoot = fullfile(srcRoot, 'USTB-master');
+if isfolder(ustbRoot)
+    rmpath(genpath(ustbRoot));
+end
+
+sarmode = 'spotlight';
+resultPath = [fullfile(scriptDir, 'results', sarmode, dataName) filesep];
+load([resultPath, dataName '.mat'], "smpi", "ssi", "alpha");
+
+% Method Names and Annotations
+methodGroups = {
+    '$\widehat\mathbf{p}$ (ours)', {'diffvar5', 'diffvar10', 'diffvar20', 'diffvar50', 'diffvar200'};
+    '$\mathbf{\widehat p^+}$ (ours)', {'diffvarPlus5','diffvarPlus10','diffvarPlus20','diffvarPlus50','diffvarPlus200'};
+    'NLM', {'nlm1', 'nlm2', 'nlm3', 'nlm4', 'nlm5'};
+    'BLF', {'blf1', 'blf2', 'blf3', 'blf4', 'blf5'};
+    'SRAD', {'srad1', 'srad2', 'srad3', 'srad4', 'srad5'};
+};
+otherMethods = {'fans', 'scunet_color_real_gan', 'merlin'};
+otherMethodsAnnos = {'FANS', 'SCUNet', 'MERLIN'};
+switch dataName
+    case '50'
+        xl = 0; xr = 2.6; yd = 0; yu = 2.2;
+    case '388'
+        xl = 0; xr = 1.3; yd = 0; yu = 4;
+    case '11'
+        xl = -0.15; xr = 0.9; yd = 0; yu = 5.8;
+    case '12'
+        xl = -0.05; xr = 0.51; yd = 0; yu = 8.5;
+    case '14'
+        xl = -0.05; xr = 1.27; yd = 0; yu = 3.55;
+end
+
+cmap = lines(size(methodGroups, 1) + size(otherMethods,2));
+
+
+figure(Position=[97 487 380 380+30]);
+observColor = [0.5, 0.5, 0.5];
+ax = gca;
+axisPos = get(ax, 'Position');
+scatterHandle = scatter(alpha.('observ'),smpi.('observ'), 100, "filled", MarkerFaceColor=observColor, MarkerEdgeColor=observColor);
+xlim([xl, xr]); ylim([yd, yu]); 
+xCoord = alpha.('observ');
+yCoord = smpi.('observ');
+text(xCoord, yCoord, 'noisy', 'FontSize', 11, 'Color', observColor, ...
+    'BackgroundColor', 'none', 'EdgeColor', 'none', 'FontWeight', 'bold', ...
+    'Interpreter', 'latex', 'FontName', 'Times New Roman'); %
+
+hold on
+
+alpha_vals = linspace(0.3, 1, 5); % Transparency gradient
+
+% Plot scatterers for grouped methods
+for groupIdx = 1:size(methodGroups, 1)
+    groupName = methodGroups{groupIdx, 1};
+    groupMethods = methodGroups{groupIdx, 2};
+    groupColor = cmap(groupIdx, :);
+
+    % Gather coordinates for the group
+    xGroup = [];
+    yGroup = [];
+    for methodIdx = 1:numel(groupMethods)
+        methodName = groupMethods{methodIdx};
+        scatter(alpha.(methodName), smpi.(methodName), 100, 'filled', ...
+            'MarkerFaceColor', groupColor, 'MarkerFaceAlpha', alpha_vals(methodIdx));
+        xGroup = [xGroup; alpha.(methodName)];
+        yGroup = [yGroup; smpi.(methodName)];
+    end
+    xCoord = alpha.(methodName);
+    yCoord = smpi.(methodName);
+    text(xCoord, yCoord, groupName,'FontSize',11,'Color',groupColor, ...
+        'BackgroundColor','none','EdgeColor', 'none', 'FontWeight', 'bold', ...
+        'Interpreter', 'latex', 'FontName', 'Times New Roman'); %FontWeight='bold'
+
+    % Draw a smooth line through the scatterers if there are multiple points
+    if numel(xGroup) > 1
+        % Sort the points by x-coordinates
+        [sortedX, sortIdx] = sort(xGroup);
+        sortedY = yGroup(sortIdx);
+    
+        % Handle duplicate x-values
+        [uniqueX, ~, uniqueIdx] = unique(sortedX, 'stable');
+        if numel(uniqueX) < numel(sortedX)
+            % Average y-values for duplicate x-values
+            averagedY = accumarray(uniqueIdx, sortedY, [], @mean);
+            sortedX = uniqueX;
+            sortedY = averagedY;
+        end
+        % Smooth line interpolation
+        if numel(sortedX) > 1
+            smoothX = linspace(min(sortedX), max(sortedX), 100);
+            smoothY = interp1(sortedX, sortedY, smoothX, 'pchip');
+            plot(smoothX, smoothY, '-', 'Color', groupColor, 'LineWidth', 1.5);
+        end
+    end
+end
+
+% Define a colormap for the other methods
+otherColormap = cmap(size(methodGroups, 1)+1:end,:); % Generates a unique color for each method
+for i = 1:numel(otherMethods)
+    methodColor = otherColormap(i, :);
+    methodName = otherMethods{i};
+    methodNameAnnos = otherMethodsAnnos{i};
+    scatter(alpha.(methodName), smpi.(methodName), 100, 'filled', ...
+        'MarkerFaceColor',methodColor, 'MarkerFaceAlpha', 1);
+    xCoord = alpha.(methodName);
+    yCoord = smpi.(methodName);
+    text(xCoord, yCoord, methodNameAnnos,'FontSize',11,'Color',methodColor, ...
+        'BackgroundColor','none','EdgeColor', 'none', 'FontWeight', 'bold', ...
+        'Interpreter', 'latex', 'FontName', 'Times New Roman'); %FontWeight='bold'
+end
+
+
+hold off;
+xlabel('Resolution (\alpha)'); ylabel('SMPI');
+xlim([xl, xr]); ylim([yd, yu]);

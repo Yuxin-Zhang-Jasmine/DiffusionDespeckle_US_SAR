@@ -1,0 +1,12 @@
+venv/
+.idea/
+__pycache__/
+*.py[cod]
+
+# Generated outputs and omitted upstream example data
+outputImages/
+data/invivo/
+data/test-set_simulated/
+
+# Upstream research-use model weight; download it separately
+data/network.pt

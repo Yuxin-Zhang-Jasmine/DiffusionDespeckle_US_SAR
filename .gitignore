@@ -1,0 +1,52 @@
+# Operating-system and editor metadata
+.DS_Store
+Thumbs.db
+__MACOSX/
+.idea/
+**/.idea/
+*.asv
+*~
+
+# Python caches and local environments
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Generated experiment outputs
+**/results/**
+
+# Retain the two result sets distributed with the public repository
+!/PostAnalysis/03_SAR/results/spotlight/
+!/PostAnalysis/03_SAR/results/spotlight/388/
+!/PostAnalysis/03_SAR/results/spotlight/388/**
+!/PostAnalysis/02_US/results/11pw/
+!/PostAnalysis/02_US/results/11pw/ER/
+!/PostAnalysis/02_US/results/11pw/ER/**
+
+/DiffusionRestoration/01_nume/SensitivityNumSamples/
+/DiffusionRestoration/exp/
+*.fig
+*.log
+
+# Optional third-party methods that are not redistributed
+/PostAnalysis/src/FANS/
+/PostAnalysis/src/OBNLM/
+/PostAnalysis/src/SOTApython/DNN-lambda/
+
+# Speckle2Speckle source is retained, but its research-use weight is not
+/PostAnalysis/src/SOTApython/Speckle2Speckle/data/network.pt
+
+# Only the SCUNet color-real GAN weight is used by this project
+/PostAnalysis/src/SOTApython/SCUNet-main/model_zoo/scunet_gray_15.pth
+/PostAnalysis/src/SOTApython/SCUNet-main/model_zoo/scunet_gray_25.pth
+/PostAnalysis/src/SOTApython/SCUNet-main/model_zoo/scunet_gray_50.pth
+
+# Unused legacy/duplicate files with no project redistribution need
+/PostAnalysis/src/Rmetbrewer.p
+/PostAnalysis/src/bmpread.m
+/PostAnalysis/src/togglefig.m
+/PostAnalysis/src/gif.zip
